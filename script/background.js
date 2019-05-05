@@ -3,7 +3,7 @@ const checkIfHelperJSInjected = "typeof copy2Cb === 'function';";
 /**
  * create AS context menu in background script
  */
-browser.contextMenus.create({
+chrome.contextMenus.create({
     id: "copy-as-s3-key",
     title: "Copy AS S3 Key",
     contexts: ["selection"],
@@ -12,7 +12,7 @@ browser.contextMenus.create({
 /**
  * set the 'onclicked' logic
  */
-browser.contextMenus.onClicked.addListener((info, tab) => {
+chrome.contextMenus.onClicked.addListener((info, tab) => {
 
     if (info.menuItemId === "copy-as-s3-key") {
 
@@ -51,24 +51,23 @@ function executeCopyToCb(tab, text) {
 
     let functionCall = "copyToCb(" + JSON.stringify(text) + ");";
 
-    browser.tabs.executeScript({
+    chrome.tabs.executeScript({
         code: checkIfHelperJSInjected
-    // see if script injected already
-    }).then((results) => {
-        if (!results || results[0] !== true) {
-            return browser.tabs.executeScript(tab.id, {
-                file: "script/clipboard-helper.js",
-            });
+    }, function (checkResults) {
+        if (!checkResults || checkResults[0] !== true) {
+            chrome.tabs.executeScript(tab.id, {
+                file: "script/clipboard-helper.js"
+            }, function (injectResults) {
+                if (injectResults) {
+                    chrome.tabs.executeScript(tab.id, {
+                        code: functionCall
+                    }, function (copyResults) {
+                        if (!copyResults) {
+                            console.log("Failed to copy text: ");
+                        }
+                    })
+                }
+            })
         }
-    // either ways call the function copyToCb
-    }).then(() => {
-        return browser.tabs.executeScript(tab.id, {
-            code: functionCall,
-        });
-    // errors
-    }).catch((error) => {
-        // This could happen if the extension is not allowed to run functionCall in
-        // the page, for example if the tab is a privileged page.
-        console.error("Failed to copy text: " + error);
     });
 }
