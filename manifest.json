@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "ContextMenu: Copy S3 Key",
+  "description": "Adds a context menu to copy the generated AS s3 key for dev debugging.",
+  "version": "1.0",
+  "homepage_url": "https://github.com/mdn/webextensions-examples/tree/master/context-menu-copy-link-with-types",
+  "icons": {
+    "16" : "icons/as.png"
+  },
+  "background": {
+    "scripts": [
+      "lib/md5.min.js",
+      "script/background.js"
+    ]
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "clipboardWrite"
+  ]
+}
